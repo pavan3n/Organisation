@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e0d2b82b-761b-49fd-9e5d-75f9f56323b7" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="b24ae46b-bbb4-4d61-afd8-af31b2a80ea9" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Apple@123" database="orginagation" />
+	</db:config>
+	<flow name="orginazation_firstFlow" doc:id="a0eb09d9-da8c-4f0b-9722-25799226826d" >
+		<http:listener doc:name="Listener" doc:id="19f64e89-9715-4871-80ed-e1f4d309ef2e" config-ref="HTTP_Listener_config" path="/employee"/>
+		<db:select doc:name="Select" doc:id="5745a168-e132-460a-92fc-64c68112f983" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from employee;
+]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="403b4398-b563-4549-9030-b57251dccf6d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+
+var d1 = now() as Date {format:"dd-MM-yyyy"}
+var d2 = payload[0].joining_date as Date {format:"dd-MM-yyyy"}
+---
+exp(dd = d1-d2)
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
